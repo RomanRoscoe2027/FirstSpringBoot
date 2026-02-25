@@ -1,5 +1,5 @@
 package com.example.fitnessapp;
-
+import com.example.fitnessapp.Exercise;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +23,8 @@ public class Workout
     private List<Exercise> mExercises;
     // Have each workout hold a list containing all exercises of object type exercise from exercise class
 
+
+    // Constructor given id and name
     public Workout(int id, String name)
     {
         this.mId = id;
@@ -30,10 +32,14 @@ public class Workout
         this.mExercises = new ArrayList<Exercise>();
     }
 
-    public void AddExcercise(Exercise exercise)
+    // Add exercise to vector of exercises, those who know do
+    public void LogExercise(Exercise exercise)
     {
         mExercises.add(exercise);
     }
-
-
+    // list of exercises getter
+    public List<Exercise> getExercises()
+    {
+        return mExercises;
+    }
 }
