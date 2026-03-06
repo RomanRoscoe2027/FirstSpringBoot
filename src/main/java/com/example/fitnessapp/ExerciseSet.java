@@ -8,21 +8,22 @@ package com.example.fitnessapp;
  * If there are 3 sets of a bench press, the id can be 1-3.
  * Getters and setters for all mVars.
  */
-public abstract class Set
+public abstract class ExerciseSet
 {
     /// Making a mvar protected almost always seems bad. Bollocks.
     private int mReps;
 
+    /// Directly correlates to size
     private int mID;
 
     /// Default constructor allows us to create an exercise, and then fill in the set after
-    public Set() {
+    public ExerciseSet() {
         this.mReps = 0;
         this.mID = 0;
     }
 
     /// Constructor for set just requires id and rep range
-    public Set(int id, int reps)
+    public ExerciseSet(int id, int reps)
     {
         this.mReps = reps;
         this.mID = id;
@@ -44,8 +45,7 @@ public abstract class Set
         this.mReps = mReps;
     }
 
-    /// Using poloymorphism of Set, to call display func from each derived version
+    /// Using polymorphism of ExerciseSet, to call display func from each derived version
     public abstract String display();
-
 
 }
