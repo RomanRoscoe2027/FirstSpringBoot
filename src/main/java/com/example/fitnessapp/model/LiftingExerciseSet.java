@@ -1,4 +1,4 @@
-package com.example.fitnessapp;
+package com.example.fitnessapp.model;
 
 /**
  * Lifting set derived from class set.

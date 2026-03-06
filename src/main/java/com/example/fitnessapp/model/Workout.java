@@ -1,4 +1,5 @@
-package com.example.fitnessapp;
+package com.example.fitnessapp.model;
+
 import java.util.ArrayList; // the concrete class implementation
 import java.util.List; // just an interface providing functionality via, add, size, remove, iterators, etc. Abstraction
 import java.time.LocalDate; // allows for grabbing the current date as of right now

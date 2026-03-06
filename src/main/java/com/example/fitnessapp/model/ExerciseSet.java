@@ -1,4 +1,4 @@
-package com.example.fitnessapp;
+package com.example.fitnessapp.model;
 
 /**
  * Discovered that holding sets in exercise did more harm than good. Instead of deriving from exercise,

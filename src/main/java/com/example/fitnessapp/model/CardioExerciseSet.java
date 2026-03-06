@@ -1,4 +1,5 @@
-package com.example.fitnessapp;
+package com.example.fitnessapp.model;
+
 import java.time.Duration;
 /**
  * Cardio set derived from class set.

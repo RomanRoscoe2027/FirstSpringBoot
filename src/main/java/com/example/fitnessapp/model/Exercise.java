@@ -1,4 +1,5 @@
-package com.example.fitnessapp;
+package com.example.fitnessapp.model;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
