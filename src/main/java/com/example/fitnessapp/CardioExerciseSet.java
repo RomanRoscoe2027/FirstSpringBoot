@@ -1,5 +1,5 @@
 package com.example.fitnessapp;
-
+import java.time.Duration;
 /**
  * Cardio set derived from class set.
  *
@@ -7,20 +7,36 @@ package com.example.fitnessapp;
  *
  * Contains, member variables, duration, distance, etc.
  */
-public class CardioSet extends Set {
+public class CardioExerciseSet extends ExerciseSet {
 
-    private int mDuration;
+    /// uses same time package previously for DateTime of workout
+    private Duration mDuration;
+
+    /// minutes
     private double mDistance;
 
-
-    public CardioSet(int id, int reps, int duration, double distance) {
+    /**
+     * Constructor for a CardioExerciseSet
+     * @param reps
+     * @param duration
+     * @param distance
+     */
+    public CardioExerciseSet(int id, int reps, Duration duration, double distance) {
         super(id, reps);
 
         this.mDuration = duration;
         this.mDistance = distance;
     }
 
-    public int getDuration() {
+    /**
+     * Empty Constructor
+     */
+    public CardioExerciseSet() {
+        this.mDuration = Duration.ofMinutes(0);
+        this.mDistance = 0;
+    }
+    /// GETTERS
+    public Duration getDuration() {
         return mDuration;
     }
 
@@ -28,7 +44,8 @@ public class CardioSet extends Set {
         return mDistance;
     }
 
-    public void setDuration(int mDuration) {
+    /// SETTERS
+    public void setDuration(Duration mDuration) {
         this.mDuration = mDuration;
     }
 
@@ -36,12 +53,17 @@ public class CardioSet extends Set {
         this.mDistance = mDistance;
     }
 
+    /**
+     * Override abstract display func for different string formatting.
+     * No need for SB
+     * @return string object for display
+     */
     @Override
     public String display() {
-        return "Set " + getID() +
+        return "Cardio Set " + getID() +
                 ": " + getReps() +
-                " reps." +
-                " Distance" + mDistance +
-                " in " + mDuration + " minutes.";
+                " rep(s)." +
+                " Distance " + mDistance +
+                " miles in " + mDuration.toMinutes() + " minutes.";
     }
 }
