@@ -33,6 +33,13 @@ public class Exercise
      * If have more set variants, allows for it.
      */
     private Supplier<? extends ExerciseSet> mExerciseSetFactory;
+
+    /**
+     *
+     * @param name
+     * @param numberOfSets
+     * @param factory
+     */
     public Exercise(String name, int numberOfSets, Supplier<? extends ExerciseSet> factory)
     {
         /// Name of exercise

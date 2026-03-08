@@ -1,10 +1,10 @@
 package com.example;
 
-import com.example.fitnessapp.Exercise;
-import com.example.fitnessapp.ExerciseSet;
-import com.example.fitnessapp.LiftingExerciseSet;
-import com.example.fitnessapp.CardioExerciseSet;
-import com.example.fitnessapp.Workout;
+import com.example.fitnessapp.model.Exercise;
+import com.example.fitnessapp.model.ExerciseSet;
+import com.example.fitnessapp.model.LiftingExerciseSet;
+import com.example.fitnessapp.model.CardioExerciseSet;
+import com.example.fitnessapp.model.Workout;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -15,7 +15,7 @@ public class WorkoutExerciseTest
 {
     @Test
     void LogExercise() {
-        Workout workout = new Workout(0, "Push");
+        Workout workout = new Workout("Push");
         Exercise benchPress = Exercise.makeLiftingExercise("Bench Press", 3);
 
         workout.LogExercise(benchPress);
@@ -28,7 +28,7 @@ public class WorkoutExerciseTest
 
     @Test
     void displayWorkout() {
-        Workout workout = new Workout(0, "Push");
+        Workout workout = new Workout("Push");
 
         Exercise benchPress = Exercise.makeLiftingExercise("Bench Press", 2);
         Exercise jog = Exercise.makeCardioExercise("Jog", 1);

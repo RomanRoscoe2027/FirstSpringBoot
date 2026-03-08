@@ -19,8 +19,8 @@ import java.time.LocalDate; // allows for grabbing the current date as of right 
  */
 public class Workout
 {
-    private int mId = 0;
-    // all workouts will have in id, but set default to 0 for now. Will be important for db.
+    private int mId = 1;
+    // all workouts will have in id, but set default to 1 for, others will increment by 1 of prev
     private String mDayName;
     // all workouts have a name like push, pull, legs etc
     private List<Exercise> mExercises;
@@ -29,23 +29,28 @@ public class Workout
     private LocalDate mDate;
     // typical way to standardize time via java.time package. Will use often
 
-    // Constructor given id and name
-    public Workout(int id, String name)
+    /// Constructor given name, let tracker handle ids
+    public Workout(String name)
     {
-        this.mId = id;
         this.mDayName = name;
         this.mExercises = new ArrayList<Exercise>();
         this.mDate = LocalDate.now();
     }
-
+    /// Constructor allowing date setting (good for junit testing)
+    public Workout(String name, LocalDate date)
+    {
+        this.mDayName = name;
+        this.mExercises = new ArrayList<>();
+        this.mDate = date;
+    }
 
     ///  GETTERS
-    public int getmId()
+    public int getId()
     {
         return mId;
     }
 
-    public String getmDayName()
+    public String getDayName()
     {
         return mDayName;
     }
