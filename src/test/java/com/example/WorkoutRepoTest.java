@@ -1,6 +1,7 @@
 package com.example;
 
 import com.example.fitnessapp.model.*;
+import com.example.fitnessapp.repository.WorkoutRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,9 +11,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TrackerTest
+public class WorkoutRepoTest
 {
-    private WorkoutTracker tracker;
+    private WorkoutRepository repository;
 
     private Workout pushWorkout;
     private Workout pullWorkout;
@@ -33,7 +34,7 @@ public class TrackerTest
     @BeforeEach
     void setUp()
     {
-        tracker = new WorkoutTracker();
+        repository = new WorkoutRepository();
 
         pushWorkout = new Workout("Push", LocalDate.of(2026, 3, 1));
         pullWorkout = new Workout("Pull", LocalDate.of(2026, 3, 3));
@@ -93,9 +94,9 @@ public class TrackerTest
         legsWorkout.LogExercise(legCurl);
         legsWorkout.LogExercise(stairMaster);
 
-        tracker.addWorkout(pushWorkout);
-        tracker.addWorkout(pullWorkout);
-        tracker.addWorkout(legsWorkout);
+        repository.save(pushWorkout);
+        repository.save(pullWorkout);
+        repository.save(legsWorkout);
     }
 
     private void setLiftingData(Exercise exercise, int setIndex, int reps, double weight)
@@ -122,7 +123,7 @@ public class TrackerTest
     @Test
     void addWorkoutAndGetWorkoutHistoryTest()
     {
-        List<Workout> history = tracker.getWorkoutHistory();
+        List<Workout> history = repository.findAll();
 
         assertEquals(3, history.size());
         assertTrue(history.contains(pushWorkout));
@@ -201,7 +202,7 @@ public class TrackerTest
     @Test
     void eachWorkoutContainsBothLiftingAndCardioTest()
     {
-        for (Workout workout : tracker.getWorkoutHistory())
+        for (Workout workout : repository.findAll())
         {
             boolean hasLifting = false;
             boolean hasCardio = false;
@@ -232,7 +233,7 @@ public class TrackerTest
         // Assumes tracker method signature is:
         // List<Workout> findWorkoutsByDate(LocalDate startDate, LocalDate endDate)
 
-        List<Workout> results = tracker.findWorkoutsMatchingDate(
+        List<Workout> results = repository.findByDateRange(
                 LocalDate.of(2026, 3, 2),
                 LocalDate.of(2026, 3, 5)
         );
@@ -249,7 +250,7 @@ public class TrackerTest
         // Assumes tracker method signature is:
         // List<Workout> findWorkoutsByName(String name)
 
-        List<Workout> results = tracker.findWorkoutsMatchingName("Push");
+        List<Workout> results = repository.findByName("Push");
 
         assertEquals(1, results.size());
         assertEquals("Push", results.get(0).getDayName());
@@ -259,7 +260,7 @@ public class TrackerTest
     @Test
     void findWorkoutsByNameNoMatchTest()
     {
-        List<Workout> results = tracker.findWorkoutsMatchingName("Chest");
+        List<Workout> results = repository.findByName("Chest");
 
         assertTrue(results.isEmpty());
     }
@@ -278,7 +279,7 @@ public class TrackerTest
     @Test
     void printAllWorkoutsTest()
     {
-        for (Workout workout : tracker.getWorkoutHistory())
+        for (Workout workout : repository.findAll())
         {
             System.out.println("=================================");
             System.out.println("Workout Name: " + workout.getDayName());

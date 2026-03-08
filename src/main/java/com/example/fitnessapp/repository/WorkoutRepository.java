@@ -1,35 +1,39 @@
-package com.example.fitnessapp.model;
+package com.example.fitnessapp.repository;
 
+import com.example.fitnessapp.model.Workout;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
 import java.util.ArrayList; // the concrete class implementation
 import java.util.List; // just an interface providing functionality via, add, size, remove, iterators, etc. Abstraction
-import java.time.LocalDate;
 
-public class WorkoutTracker {
-
+@Repository
+public class WorkoutRepository
+{
     /// List containing all workouts
     private List<Workout> mWorkouts;
 
     /// Getter for mWorkouts
-    public List<Workout> getWorkoutHistory()
+    public List<Workout> findAll()
     {
         return new ArrayList<>(mWorkouts);
     }
 
     /**
-     * Constructor for workout tracker to initialize.
+     * Constructor for workout repository to initialize.
      * Will probably make it its own initialize function of sorts on app startup.
      */
-    public WorkoutTracker()
+    public WorkoutRepository()
     {
         mWorkouts = new ArrayList<>();
     }
 
     /**
-     * Function adds a workout to our tracker.
+     * Function adds a workout to our repository.
      * Error checks for no empty workout.
      * @param workout
      */
-    public void addWorkout(Workout workout)
+    public void save(Workout workout)
     {
         if (workout == null)
         {
@@ -39,10 +43,10 @@ public class WorkoutTracker {
     }
 
     /**
-     * Remove a workout from the tracker.
+     * Remove a workout from the repository.
      * @param workout
      */
-    public void removeWorkout(Workout workout)
+    public void delete(Workout workout)
     {
         mWorkouts.remove(workout);
     }
@@ -51,12 +55,12 @@ public class WorkoutTracker {
      * Find workouts given a name for the day, push, pull, legs, etc.
      * Match the name to all workouts with said name and return a list of workouts with the same name.
      * Trims and doesn't care about caps
-     * Don't modify actual tracker, return a new list ofc.
+     * Don't modify actual repository, return a new list ofc.
      *
      * @param workoutName
      * @return matchingWorkouts - a list of all workouts with the same or similar names.
      */
-    public List<Workout> findWorkoutsMatchingName(String workoutName)
+    public List<Workout> findByName(String workoutName)
     {
         /// Create return list
         List<Workout> matchingWorkouts = new ArrayList<>();
@@ -83,13 +87,13 @@ public class WorkoutTracker {
      * Find workouts given an interval of dates.
      * Any workouts falling within the interval will be returned, can be used for one day as well.
      * (BUT LIKELY WILL SEPERATE ONE DAY FROM MANY DAYS, FRONTEND)
-     * Don't modify actual tracker, return a new list ofc.
+     * Don't modify actual repository, return a new list ofc.
      *
      * @param startDate
      * @param endDate
      * @return matchingWorkouts - a list of all workouts within the interval.
      */
-    public List<Workout> findWorkoutsMatchingDate(LocalDate startDate, LocalDate endDate)
+    public List<Workout> findByDateRange(LocalDate startDate, LocalDate endDate)
     {
         /// Create return list
         List<Workout> matchingWorkouts = new ArrayList<>();
@@ -123,6 +127,4 @@ public class WorkoutTracker {
         }
         return matchingWorkouts;
     }
-
-
 }
