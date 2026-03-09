@@ -1,4 +1,4 @@
-package com.example;
+package com.example.fitnessapp;
 
 import com.example.fitnessapp.model.*;
 import com.example.fitnessapp.repository.WorkoutRepository;
@@ -285,5 +285,33 @@ public class WorkoutRepoTest
             System.out.println("Workout Name: " + workout.getDayName());
             System.out.println(workout.displayWorkout());
         }
+    }
+
+    @Test
+    void saveNullWorkoutThrowsTest()
+    {
+        assertThrows(IllegalArgumentException.class, () -> repository.save(null));
+    }
+
+    @Test
+    void findByNameBlankReturnsEmptyTest()
+    {
+        assertTrue(repository.findByName("   ").isEmpty());
+    }
+
+    @Test
+    void findByDateRangeWithNullsReturnsEmptyTest()
+    {
+        assertTrue(repository.findByDateRange(null, LocalDate.now()).isEmpty());
+        assertTrue(repository.findByDateRange(LocalDate.now(), null).isEmpty());
+    }
+
+    @Test
+    void findAllReturnsCopyTest()
+    {
+        List<Workout> history = repository.findAll();
+        history.clear();
+
+        assertEquals(3, repository.findAll().size());
     }
 }
