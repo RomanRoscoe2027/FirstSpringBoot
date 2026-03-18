@@ -5,21 +5,29 @@ import com.example.fitnessapp.repository.WorkoutRepository;
 import com.example.fitnessapp.service.WorkoutService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class WorkoutServiceTest
 {
+    @Mock
     private WorkoutRepository repository;
     private WorkoutService service;
 
     @BeforeEach
     void setUp()
     {
-        repository = new WorkoutRepository();
         service = new WorkoutService(repository);
     }
 
@@ -27,10 +35,15 @@ public class WorkoutServiceTest
     void addWorkoutTrimsNameAndSavesTest()
     {
         LocalDate date = LocalDate.of(2026, 3, 1);
+        Workout savedWorkout = new Workout("Push", date);
+
+        when(repository.save(any(Workout.class))).thenReturn(savedWorkout);
+        when(repository.findAll()).thenReturn(List.of(savedWorkout));
 
         Workout workout = service.addWorkout("  Push  ", date);
 
         assertEquals("Push", workout.getDayName());
+        verify(repository).save(any(Workout.class));
         assertEquals(1, repository.findAll().size());
     }
 
@@ -53,11 +66,15 @@ public class WorkoutServiceTest
     void removeWorkoutReturnsWorkoutAndDeletesTest()
     {
         LocalDate date = LocalDate.of(2026, 3, 1);
-        repository.save(new Workout("Push", date));
+        Workout workout = new Workout("Push", date);
+
+        when(repository.findAll()).thenReturn(List.of(workout))
+                                   .thenReturn(new ArrayList<>());
 
         Optional<Workout> removed = service.removeWorkout("push", date);
 
         assertTrue(removed.isPresent());
+        verify(repository).delete(workout);
         assertTrue(repository.findAll().isEmpty());
     }
 

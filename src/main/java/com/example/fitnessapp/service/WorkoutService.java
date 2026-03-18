@@ -66,7 +66,7 @@ public class WorkoutService
     public List<Workout> findWorkoutsMatchingName(String name)
     {
         String trimmedName = requireValidName(name);
-        return repository.findByName(trimmedName);
+        return repository.findByDayName(trimmedName);
     }
 
     /**

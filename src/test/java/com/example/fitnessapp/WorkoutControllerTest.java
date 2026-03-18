@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 // Spring annotation to inject dependencies automatically
 import org.springframework.beans.factory.annotation.Autowired;
 // Configures MockMvc for testing web layer without starting a full HTTP server
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 // Loads the complete Spring application context for integration testing
 import org.springframework.boot.test.context.SpringBootTest;
 // MockMvc is the main entry point for server-side Spring MVC testing

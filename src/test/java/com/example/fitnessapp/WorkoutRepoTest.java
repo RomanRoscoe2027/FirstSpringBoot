@@ -4,6 +4,9 @@ import com.example.fitnessapp.model.*;
 import com.example.fitnessapp.repository.WorkoutRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -11,8 +14,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
 public class WorkoutRepoTest
 {
+    @Autowired
     private WorkoutRepository repository;
 
     private Workout pushWorkout;
@@ -34,8 +39,6 @@ public class WorkoutRepoTest
     @BeforeEach
     void setUp()
     {
-        repository = new WorkoutRepository();
-
         pushWorkout = new Workout("Push", LocalDate.of(2026, 3, 1));
         pullWorkout = new Workout("Pull", LocalDate.of(2026, 3, 3));
         legsWorkout = new Workout("Legs", LocalDate.of(2026, 3, 5));
@@ -54,9 +57,9 @@ public class WorkoutRepoTest
         jog = Exercise.makeCardioExercise("Jog", 1);
         setCardioData(jog, 0, 1, Duration.ofMinutes(60), 5.0);
 
-        pushWorkout.LogExercise(benchPress);
-        pushWorkout.LogExercise(triPushdown);
-        pushWorkout.LogExercise(jog);
+        pushWorkout.addExercise(benchPress);
+        pushWorkout.addExercise(triPushdown);
+        pushWorkout.addExercise(jog);
 
         /// ==================== PULL WORKOUT ====================
         deadlift = Exercise.makeLiftingExercise("Deadlift", 3);
@@ -72,9 +75,9 @@ public class WorkoutRepoTest
         bike = Exercise.makeCardioExercise("Bike", 1);
         setCardioData(bike, 0, 1, Duration.ofMinutes(25), 8.0);
 
-        pullWorkout.LogExercise(deadlift);
-        pullWorkout.LogExercise(latPulldown);
-        pullWorkout.LogExercise(bike);
+        pullWorkout.addExercise(deadlift);
+        pullWorkout.addExercise(latPulldown);
+        pullWorkout.addExercise(bike);
 
         /// ==================== LEGS WORKOUT ====================
         squat = Exercise.makeLiftingExercise("Squat", 3);
@@ -90,9 +93,9 @@ public class WorkoutRepoTest
         stairMaster = Exercise.makeCardioExercise("StairMaster", 1);
         setCardioData(stairMaster, 0, 1, Duration.ofMinutes(20), 2.0);
 
-        legsWorkout.LogExercise(squat);
-        legsWorkout.LogExercise(legCurl);
-        legsWorkout.LogExercise(stairMaster);
+        legsWorkout.addExercise(squat);
+        legsWorkout.addExercise(legCurl);
+        legsWorkout.addExercise(stairMaster);
 
         repository.save(pushWorkout);
         repository.save(pullWorkout);
@@ -250,7 +253,7 @@ public class WorkoutRepoTest
         // Assumes tracker method signature is:
         // List<Workout> findWorkoutsByName(String name)
 
-        List<Workout> results = repository.findByName("Push");
+        List<Workout> results = repository.findByDayName("Push");
 
         assertEquals(1, results.size());
         assertEquals("Push", results.get(0).getDayName());
@@ -260,7 +263,7 @@ public class WorkoutRepoTest
     @Test
     void findWorkoutsByNameNoMatchTest()
     {
-        List<Workout> results = repository.findByName("Chest");
+        List<Workout> results = repository.findByDayName("Chest");
 
         assertTrue(results.isEmpty());
     }
@@ -296,7 +299,7 @@ public class WorkoutRepoTest
     @Test
     void findByNameBlankReturnsEmptyTest()
     {
-        assertTrue(repository.findByName("   ").isEmpty());
+        assertTrue(repository.findByDayName("   ").isEmpty());
     }
 
     @Test

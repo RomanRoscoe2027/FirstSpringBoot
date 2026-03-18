@@ -1,6 +1,8 @@
 package com.example.fitnessapp.model;
 
+import jakarta.persistence.*;
 import java.time.Duration;
+import lombok.Getter;
 /**
  * Cardio set derived from class set.
  *
@@ -8,13 +10,16 @@ import java.time.Duration;
  *
  * Contains, member variables, duration, distance, etc.
  */
+@Entity
+@Getter
+@DiscriminatorValue("CARDIO") // adds a column like set_type as a distinguisher
 public class CardioExerciseSet extends ExerciseSet {
 
     /// uses same time package previously for DateTime of workout
-    private Duration mDuration;
+    private Duration duration;
 
     /// minutes
-    private double mDistance;
+    private double distance;
 
     /**
      * Constructor for a CardioExerciseSet
@@ -25,33 +30,24 @@ public class CardioExerciseSet extends ExerciseSet {
     public CardioExerciseSet(int id, int reps, Duration duration, double distance) {
         super(id, reps);
 
-        this.mDuration = duration;
-        this.mDistance = distance;
+        this.duration = duration;
+        this.distance = distance;
     }
 
     /**
      * Empty Constructor
      */
     public CardioExerciseSet() {
-        this.mDuration = Duration.ofMinutes(0);
-        this.mDistance = 0;
-    }
-    /// GETTERS
-    public Duration getDuration() {
-        return mDuration;
-    }
-
-    public double getDistance() {
-        return mDistance;
+        this.duration = Duration.ofMinutes(0);
+        this.distance = 0;
     }
 
     /// SETTERS
     public void setDuration(Duration mDuration) {
-        this.mDuration = mDuration;
+        this.duration = mDuration;
     }
-
     public void setDistance(double mDistance) {
-        this.mDistance = mDistance;
+        this.distance = mDistance;
     }
 
     /**
@@ -61,10 +57,10 @@ public class CardioExerciseSet extends ExerciseSet {
      */
     @Override
     public String display() {
-        return "Cardio Set " + getID() +
+        return "Cardio Set " + getSetNumber() +
                 ": " + getReps() +
                 " rep(s)." +
-                " Distance " + mDistance +
-                " miles in " + mDuration.toMinutes() + " minutes.";
+                " Distance " + distance +
+                " miles in " + duration.toMinutes() + " minutes.";
     }
 }

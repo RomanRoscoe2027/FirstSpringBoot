@@ -14,13 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WorkoutExerciseTest
 {
     @Test
-    void LogExercise() {
+    void logExercise() {
         Workout workout = new Workout("Push");
         Exercise benchPress = Exercise.makeLiftingExercise("Bench Press", 3);
 
-        workout.LogExercise(benchPress);
+        workout.getExercises().add(benchPress);
 
         assertEquals(1, workout.getExercises().size());
+        assertEquals(Exercise.SetKind.LIFTING, workout.getExercises().get(0).getSetKind());
         System.out.println(workout.getExercises().size());
         assertEquals("Bench Press", workout.getExercises().get(0).getName());
         System.out.println(workout.getExercises().get(0).getName());
@@ -32,6 +33,8 @@ public class WorkoutExerciseTest
 
         Exercise benchPress = Exercise.makeLiftingExercise("Bench Press", 2);
         Exercise jog = Exercise.makeCardioExercise("Jog", 1);
+        assertEquals(Exercise.SetKind.LIFTING, benchPress.getSetKind());
+        assertEquals(Exercise.SetKind.CARDIO, jog.getSetKind());
 
         ExerciseSet benchSet1 = benchPress.getSet(0);
         if (benchSet1 instanceof LiftingExerciseSet liftingSet) {
@@ -52,8 +55,8 @@ public class WorkoutExerciseTest
             cardioSet.setDistance(5.0);
         }
 
-        workout.LogExercise(benchPress);
-        workout.LogExercise(jog);
+        workout.getExercises().add(benchPress);
+        workout.getExercises().add(jog);
 
         String expected =
                 "Workout Date: " + workout.getDate() + "\n" +

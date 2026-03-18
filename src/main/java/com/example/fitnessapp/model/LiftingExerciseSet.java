@@ -1,5 +1,7 @@
 package com.example.fitnessapp.model;
 
+import jakarta.persistence.*;
+
 /**
  * Lifting set derived from class set.
  * May possibly add more ie, reps after failure, time of sets, drop sets, etc.
@@ -7,13 +9,15 @@ package com.example.fitnessapp.model;
  *
  * Contains, member variables, weight, failure, etc.
  */
+@Entity
+@DiscriminatorValue("LIFTING")
 public class LiftingExerciseSet extends ExerciseSet {
 
     /// Weight of barbell, dumbbell, etc
-    private double mWeight;
+    private double weight;
 
     /// Determines whether a set was done to failure or not.
-    private boolean mFailure;
+    private boolean failure;
 
 
     /**
@@ -25,26 +29,26 @@ public class LiftingExerciseSet extends ExerciseSet {
      */
     public LiftingExerciseSet(int id, int reps, double weight, boolean failure) {
         super(id, reps);
-        this.mWeight = weight;
-        this.mFailure = failure;
+        this.weight = weight;
+        this.failure = failure;
     }
 
     /**
      * Empty Set Constructor
      */
     public LiftingExerciseSet() {
-        this.mWeight = 0;
-        this.mFailure = false;
+        this.weight = 0;
+        this.failure = false;
     }
 
     /// GETTERS
     public double getWeight() {
-        return mWeight;
+        return weight;
     }
 
     /// SETTERS
     public void setWeight(double mWeight) {
-        this.mWeight = mWeight;
+        this.weight = mWeight;
     }
 
     /**
@@ -54,9 +58,9 @@ public class LiftingExerciseSet extends ExerciseSet {
      */
     @Override
     public String display() {
-        return "Lifting Set " + getID() +
+        return "Lifting Set " + getSetNumber() +
                 ": " + getReps() +
-                " reps at " + mWeight + " lbs" +
-                (mFailure ? " | To failure" : " | Not to failure");
+                " reps at " + weight + " lbs" +
+                (failure ? " | To failure" : " | Not to failure");
     }
 }
