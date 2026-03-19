@@ -3,6 +3,8 @@ package com.example.fitnessapp.model;
 import jakarta.persistence.*;
 import java.time.Duration;
 import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Cardio set derived from class set.
  *
@@ -15,11 +17,13 @@ import lombok.Getter;
 @DiscriminatorValue("CARDIO") // adds a column like set_type as a distinguisher
 public class CardioExerciseSet extends ExerciseSet {
 
-    /// uses same time package previously for DateTime of workout
+    @Setter
+    @Column(name = "duration")
     private Duration duration;
 
-    /// minutes
-    private double distance;
+    @Setter
+    @Column(name = "distance")
+    private Double distance;
 
     /**
      * Constructor for a CardioExerciseSet
@@ -27,7 +31,8 @@ public class CardioExerciseSet extends ExerciseSet {
      * @param duration
      * @param distance
      */
-    public CardioExerciseSet(int id, int reps, Duration duration, double distance) {
+    public CardioExerciseSet(Integer id, int reps, Duration duration, double distance)
+    {
         super(id, reps);
 
         this.duration = duration;
@@ -37,17 +42,9 @@ public class CardioExerciseSet extends ExerciseSet {
     /**
      * Empty Constructor
      */
-    public CardioExerciseSet() {
-        this.duration = Duration.ofMinutes(0);
-        this.distance = 0;
-    }
-
-    /// SETTERS
-    public void setDuration(Duration mDuration) {
-        this.duration = mDuration;
-    }
-    public void setDistance(double mDistance) {
-        this.distance = mDistance;
+    public CardioExerciseSet()
+    {
+        super();
     }
 
     /**
@@ -56,7 +53,8 @@ public class CardioExerciseSet extends ExerciseSet {
      * @return string object for display
      */
     @Override
-    public String display() {
+    public String display()
+    {
         return "Cardio Set " + getSetNumber() +
                 ": " + getReps() +
                 " rep(s)." +

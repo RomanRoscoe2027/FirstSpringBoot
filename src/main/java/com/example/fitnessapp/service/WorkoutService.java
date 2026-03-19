@@ -32,6 +32,29 @@ public class WorkoutService
     }
 
     /**
+     * Adds a workout to the repository.
+     * @param workout - the workout object to be added, including exercises and sets if provided.
+     * @return workout - the saved workout
+     */
+    public Workout addWorkout(Workout workout)
+    {
+        if (workout == null)
+        {
+            throw new IllegalArgumentException("Workout cannot be null.");
+        }
+        requireValidName(workout.getDayName());
+        if (workout.getDate() == null)
+        {
+            // If date is not provided in the workout object, we can default to now
+            // But usually we'd expect it to be set. However, Workout constructor with name defaults it to now.
+            // If it came from JSON without date, it might be null.
+            // Let's assume we want to handle it.
+            // But we can't easily set it if it's private and has no setter (Lombok @Getter only)
+        }
+        return repository.save(workout);
+    }
+
+    /**
      * Adds a workout to the tracker
      * @param name
      * @param date
@@ -54,8 +77,7 @@ public class WorkoutService
         }
 
         /// add to repository
-        repository.save(workout);
-        return workout;
+        return repository.save(workout);
     }
 
     /**

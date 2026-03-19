@@ -1,6 +1,8 @@
 package com.example.fitnessapp.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Lifting set derived from class set.
@@ -9,15 +11,20 @@ import jakarta.persistence.*;
  *
  * Contains, member variables, weight, failure, etc.
  */
+@Getter
 @Entity
 @DiscriminatorValue("LIFTING")
 public class LiftingExerciseSet extends ExerciseSet {
 
     /// Weight of barbell, dumbbell, etc
-    private double weight;
+    @Setter
+    @Column(name = "weight")
+    private Double weight;
 
     /// Determines whether a set was done to failure or not.
-    private boolean failure;
+    @Setter
+    @Column(name = "failure")
+    private Boolean failure;
 
 
     /**
@@ -27,7 +34,7 @@ public class LiftingExerciseSet extends ExerciseSet {
      * @param weight
      * @param failure
      */
-    public LiftingExerciseSet(int id, int reps, double weight, boolean failure) {
+    public LiftingExerciseSet(Integer id, Integer reps, Double weight, Boolean failure) {
         super(id, reps);
         this.weight = weight;
         this.failure = failure;
@@ -36,19 +43,9 @@ public class LiftingExerciseSet extends ExerciseSet {
     /**
      * Empty Set Constructor
      */
-    public LiftingExerciseSet() {
-        this.weight = 0;
-        this.failure = false;
-    }
-
-    /// GETTERS
-    public double getWeight() {
-        return weight;
-    }
-
-    /// SETTERS
-    public void setWeight(double mWeight) {
-        this.weight = mWeight;
+    public LiftingExerciseSet()
+    {
+        super();
     }
 
     /**

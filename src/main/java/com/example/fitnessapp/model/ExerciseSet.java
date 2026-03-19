@@ -1,7 +1,9 @@
 package com.example.fitnessapp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Discovered that holding sets in exercise did more harm than good. Instead of deriving from exercise,
@@ -23,10 +25,20 @@ public abstract class ExerciseSet
     private Long id;
 
     /// Making a mvar protected almost always seems bad. Bollocks.
-    private int reps;
+    @Setter
+    private Integer reps;
 
     /// Directly correlates to size (set number within exercise)
-    private int setNumber;
+    @Setter
+    private Integer setNumber;
+
+    @Setter // lombok provides setter for exercise in which the set belongs too
+    @ManyToOne(fetch = FetchType.LAZY)
+    // not needed, but prevents loading exercises for workout until db gets query explicitly
+    @JoinColumn(name = "exercise_id", nullable = false) // foreign key to workout
+    @JsonBackReference
+    private Exercise exercise; // exercise owned by this workout, back references via json format without breaking
+
 
     /// Default constructor allows us to create an exercise, and then fill in the set after
     public ExerciseSet()
@@ -36,27 +48,14 @@ public abstract class ExerciseSet
     }
 
     /// Constructor for set just requires id and rep range
-    public ExerciseSet(int id, int reps)
+    public ExerciseSet(Integer setNumber, Integer reps)
     {
         this.reps = reps;
-        this.setNumber = id;
-    }
-
-    /*
-     The following are the traditional getter and setters.
-     */
-    public void setID(int setNumber)
-    {
         this.setNumber = setNumber;
     }
-    public void setReps(int reps) { this.reps = reps;}
 
     /// Using polymorphism of ExerciseSet, to call display func from each derived version
     public abstract String display();
 
 }
 
-/**
- * KEY POINT:
- *
- */

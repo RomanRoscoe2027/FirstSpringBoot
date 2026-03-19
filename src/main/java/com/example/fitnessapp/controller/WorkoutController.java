@@ -42,16 +42,28 @@ public class WorkoutController
     }
 
     /**
-     * Handles POST /api/workouts?name=Push&date=2026-03-01
-     * @param name - name of workout, push, pull, legs
-     * @param date - local date time of workout, either now as default blank, or custom date
-     * @return - calls the service to create a workout and returns said workout
+     * Handles POST /api/workouts.
+     * Integrates with adding exercises and sets by receiving a full Workout object in the body.
+     * @param workout - workout object from JSON body.
+     * @return - saved workout with all components.
      */
     @PostMapping
-    public Workout createWorkout(
+    public Workout createWorkout(@RequestBody Workout workout)
+    {
+        return workoutService.addWorkout(workout);
+    }
+
+    /**
+     * Handles POST /api/workouts/params?name=Push&date=2026-03-01
+     * Original creation method via query parameters.
+     * @param name - name of workout.
+     * @param date - date of workout.
+     * @return - created workout.
+     */
+    @PostMapping("/params")
+    public Workout createWorkoutWithParams(
             @RequestParam String name,
             @RequestParam(required = false)
-            /// DateTimeFormat
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
     {
         return workoutService.addWorkout(name, date);
@@ -62,7 +74,7 @@ public class WorkoutController
      * @param name - Whatever the name of workout is
      * @return List<Workout>- All workouts with the same name
      */
-    @GetMapping("/search/matchingname")
+    @GetMapping("/search/name")
     public List<Workout> searchByMatchingName(@RequestParam String name)
     {
         return workoutService.findWorkoutsMatchingName(name);

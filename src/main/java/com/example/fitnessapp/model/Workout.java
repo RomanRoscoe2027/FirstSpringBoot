@@ -1,5 +1,6 @@
 package com.example.fitnessapp.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import java.util.ArrayList; // the concrete class implementation
@@ -34,42 +35,45 @@ public class Workout
     @Id // primary key identifier
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-increment primary key
     @Column(name = "id") // keep existing DB column name
-    private int id;
-    // all workouts will have in id, but set default to 1 for, others will increment by 1 of prev
+    private Long id;
 
-    @Column(name = "dayName")
+    @Column(name = "dayName", nullable = false)
     private String dayName;
     // all workouts have a name like push, pull, legs etc
 
     /**
      * @OneToMany annotation establishes a one-to-many relationship between Workout and Exercise entities.
-     * @JoinColumn specifies the foreign key column in the Exercise table that references the Workout table.
-     * This being workout_id of course.
+     *
+     * Mapped by is better than @JoinColumn here as it gives direct ownership needed by exercise to a workout, rather
+     * thatn a exercise being able to belong independently. Fits bidirectional relationship better. Same idea for
+     * Exercise ----> exerciseSets.
+     *
      * @CascadeType.ALL ensures that all operations (persist, merge, remove) are cascaded to the associated Exercise entities and
      * effect that entity as well and not just this one.
      * @OrphanRemoval=true allows JPA to automatically remove orphaned Exercise entities when they are no longer associated with a Workout.
      * Important as exercises would not belong to any workout if removed and have no reason to stay in DB
      */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "workout_id")
-    private List<Exercise> exercises;
+    @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // allows for json serialization of workout, without infinite reference recursion as workout owns exercises which backtrack to workouts
+    private List<Exercise> exercises = new ArrayList<>();
     // Have each workout hold a list containing all exercises of object type exercise from exercise class
     // array format for now, but lets us have some flexibility for dev if want to switch
 
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private LocalDate date;
     // typical way to standardize time via java.time package. Will use often
 
     /// Default constructor for JPA
-    public Workout() {
-        this.exercises = new ArrayList<>();
+    public Workout()
+    {
+
     }
+
 
     /// Constructor given name, let tracker handle ids
     public Workout(String name)
     {
         this.dayName = name;
-        this.exercises = new ArrayList<Exercise>();
         this.date = LocalDate.now();
     }
 
@@ -77,7 +81,6 @@ public class Workout
     public Workout(String name, LocalDate date)
     {
         this.dayName = name;
-        this.exercises = new ArrayList<>();
         this.date = date;
     }
 
@@ -101,7 +104,7 @@ public class Workout
         // sift through all exercises and return only necessary info via getters
         {
             sb.append("Exercise: ").append(exercise.getName()).append("\n");
-            int setNumber = 1;
+            Integer setNumber = 1;
             for (ExerciseSet exerciseSet : exercise.getExerciseSets())
             {
                         sb.append(exerciseSet.display()).append("\n");
@@ -121,6 +124,7 @@ public class Workout
     public void addExercise(Exercise exercise)
     {
         exercises.add(exercise);
+        exercise.setWorkout(this); // tells exercise which workout it belongs too
     }
 }
 
