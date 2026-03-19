@@ -3,6 +3,8 @@ package com.example.fitnessapp.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList; // the concrete class implementation
 import java.util.List; // just an interface providing functionality via, add, size, remove, iterators, etc. Abstraction
 import java.time.LocalDate; // allows for grabbing the current date as of right now
@@ -62,6 +64,11 @@ public class Workout
     @Column(name = "date", nullable = false)
     private LocalDate date;
     // typical way to standardize time via java.time package. Will use often
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // workout must be owned by a user
 
     /// Default constructor for JPA
     public Workout()
