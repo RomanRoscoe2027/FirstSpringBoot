@@ -66,5 +66,9 @@ public interface UserRepository extends JpaRepository<User, Long>
  * So if we have a user with the username "john" and email "john@example.com",
  * we can use these methods to check if another user with the same username or email already exists.
  *
- *
+ * Understanding the syntax of the existsBy queries:
+ *  We determine first whether a email or username exists by checking if the query returns a 1. If so
+ *  the "WHEN EXISTS" part is true, and casts 1 as a bit which is a SQL Server type that reflects a java boolean value
+ *  as true, and 0 reflects as false. Basically we created a function that queries for a boolean value, for easy
+ *  error handling if an email or username attempting to be registered is already in the db.
  */
