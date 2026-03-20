@@ -1,8 +1,10 @@
 package com.example.fitnessapp.service;
 
+import com.example.fitnessapp.model.User;
 import com.example.fitnessapp.model.Workout;
 import com.example.fitnessapp.repository.WorkoutRepository;
 import com.example.fitnessapp.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service; // needed for spring service components.
 
@@ -21,68 +23,19 @@ public class WorkoutService
     private final WorkoutRepository workoutRepository;
     private final UserRepository userRepository;
 
-    public WorkoutService(WorkoutRepository repository)
+    @Transactional
+    public Workout addWorkoutToUser(Long userId, String dayName)
     {
-        this.repository = repository; /// clear repo dependency
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        Workout workout = new Workout();
+        workout.setDayName(dayName);
+        workout.setUser(user);
+
+        return workoutRepository.save(workout);
     }
 
-    /**
-     * Grabs workout history via tracker from service.
-     * @return tracker.getWorkoutHistory - all workout history via list of workouts
-     */
-    public List<Workout> getWorkoutHistory()
-    {
-        return repository.findAll();
-    }
-
-    /**
-     * Adds a workout to the repository.
-     * @param workout - the workout object to be added, including exercises and sets if provided.
-     * @return workout - the saved workout
-     */
-    public Workout addWorkout(Workout workout)
-    {
-        if (workout == null)
-        {
-            throw new IllegalArgumentException("Workout cannot be null.");
-        }
-        requireValidName(workout.getDayName());
-        if (workout.getDate() == null)
-        {
-            // If date is not provided in the workout object, we can default to now
-            // But usually we'd expect it to be set. However, Workout constructor with name defaults it to now.
-            // If it came from JSON without date, it might be null.
-            // Let's assume we want to handle it.
-            // But we can't easily set it if it's private and has no setter (Lombok @Getter only)
-        }
-        return repository.save(workout);
-    }
-
-    /**
-     * Adds a workout to the tracker
-     * @param name
-     * @param date
-     * @return workout - the workout which was added
-     */
-    public Workout addWorkout(String name, LocalDate date)
-    {
-        String trimmedName = requireValidName(name);
-        Workout workout;
-
-        /// Check null date, if so create with just name and current date
-        if (date == null)
-        {
-            workout = new Workout(trimmedName);
-        }
-        /// Create workout with custom date
-        else
-        {
-            workout = new Workout(trimmedName, date);
-        }
-
-        /// add to repository
-        return repository.save(workout);
-    }
 
     /**
      * Finds matching workouts by name via tracker
@@ -92,7 +45,7 @@ public class WorkoutService
     public List<Workout> findWorkoutsMatchingName(String name)
     {
         String trimmedName = requireValidName(name);
-        return repository.findByDayName(trimmedName);
+        return workoutRepository.findByDayName(trimmedName);
     }
 
     /**
@@ -104,7 +57,7 @@ public class WorkoutService
     public List<Workout> findWorkoutsMatchingDate(LocalDate start, LocalDate end)
     {
         requireValidDateRange(start, end);
-        return repository.findByDateRange(start, end);
+        return workoutRepository.findByDateRange(start, end);
     }
 
     /**
@@ -116,32 +69,22 @@ public class WorkoutService
      * @param date - date of workout to be removed
      * @return boolean - true for workout removed, false otherwise
      */
-    public Optional<Workout> removeWorkout(String name, LocalDate date)
+    @Transactional
+    public Optional<Workout> removeWorkout(Long userId, String name, LocalDate date)
     {
-        /// Check the name to ensure validity
         String trimmedName = requireValidName(name);
+
         if (date == null)
         {
-            /// can't remove workout without date key
             throw new IllegalArgumentException("Workout date is required.");
         }
 
-        /// Return full history of the repository in new list
-        List<Workout> history = repository.findAll();
+        Optional<Workout> matchingWorkout =
+                workoutRepository.findByUserIdAndDayNameAndDate(userId, trimmedName, date); // NOT IMPLEMENTED WILL COME BACK TO. JUST HAVE TO ADD USER ID WITH QUERY
 
-        for (Workout workout : history)
-        {
-            boolean sameName = workout.getDayName().equalsIgnoreCase(trimmedName);
-            boolean sameDate = workout.getDate().isEqual(date);
-            /// check date and name of repository to ensure we have correct one and remove
-            if (sameName && sameDate)
-            {
-                repository.delete(workout);
-                return Optional.of(workout); // protects against null
-            }
-        }
+        matchingWorkout.ifPresent(workoutRepository::delete);
 
-        return Optional.empty(); // delete failed so default to empty
+        return matchingWorkout;
     }
 
     /**

@@ -39,6 +39,7 @@ public class Workout
     @Column(name = "id") // keep existing DB column name
     private Long id;
 
+    @Setter
     @Column(name = "dayName", nullable = false)
     private String dayName;
     // all workouts have a name like push, pull, legs etc
