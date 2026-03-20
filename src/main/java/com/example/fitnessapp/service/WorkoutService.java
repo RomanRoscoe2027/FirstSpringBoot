@@ -2,6 +2,8 @@ package com.example.fitnessapp.service;
 
 import com.example.fitnessapp.model.Workout;
 import com.example.fitnessapp.repository.WorkoutRepository;
+import com.example.fitnessapp.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service; // needed for spring service components.
 
 import java.time.LocalDate;
@@ -12,10 +14,12 @@ import java.util.Optional; // designed to protect agains null values, good on ht
  * Create service of Spring.
  */
 @Service
+@RequiredArgsConstructor
 public class WorkoutService
 {
     /// Initialize repository, make final so ref can't be changed
-    private final WorkoutRepository repository;
+    private final WorkoutRepository workoutRepository;
+    private final UserRepository userRepository;
 
     public WorkoutService(WorkoutRepository repository)
     {
