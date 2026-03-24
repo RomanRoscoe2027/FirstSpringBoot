@@ -1,242 +1,146 @@
 package com.example.fitnessapp;
 
 import com.example.fitnessapp.model.*;
+import com.example.fitnessapp.repository.UserRepository;
 import com.example.fitnessapp.repository.WorkoutRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
-
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
+
 import static org.junit.jupiter.api.Assertions.*;
-
-@DataJpaTest
-public class WorkoutRepoTest
+@DataJpaTest // creates a test db for us, and automatically configures the repo beans, IN MEMORY DB
+class WorkoutRepoTest
 {
-    @Autowired
-    private WorkoutRepository repository;
+    @Autowired // injects the workout repo bean into the test, does the same with user beans
+    private WorkoutRepository workoutRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    // Create test users and workouts
+    private User testUser;
+    private User otherUser;
+
+    // Create test workouts
     private Workout pushWorkout;
     private Workout pullWorkout;
     private Workout legsWorkout;
+    private Workout otherUsersPushWorkout;
 
-    private Exercise benchPress;
-    private Exercise triPushdown;
-    private Exercise jog;
-
-    private Exercise deadlift;
-    private Exercise latPulldown;
-    private Exercise bike;
-
-    private Exercise squat;
-    private Exercise legCurl;
-    private Exercise stairMaster;
-
-    @BeforeEach
+    @BeforeEach // runs before each test, configuring a new repo
     void setUp()
     {
-        pushWorkout = new Workout("Push", LocalDate.of(2026, 3, 1));
-        pullWorkout = new Workout("Pull", LocalDate.of(2026, 3, 3));
-        legsWorkout = new Workout("Legs", LocalDate.of(2026, 3, 5));
+        // Create valid users first
+        testUser = createAndSaveUser(
+                "testUser",
+                "test@example.com",
+                "hashed_password"
+        );
 
-        /// ==================== PUSH WORKOUT ====================
-        benchPress = Exercise.makeLiftingExercise("Bench Press", 3);
-        setLiftingData(benchPress, 0, 8, 225.0);
-        setLiftingData(benchPress, 1, 7, 225.0);
-        setLiftingData(benchPress, 2, 4, 255.0);
+        otherUser = createAndSaveUser(
+                "otherUser",
+                "other@example.com",
+                "other_hashed_password"
+        );
 
-        triPushdown = Exercise.makeLiftingExercise("Tricep Pushdown", 3);
-        setLiftingData(triPushdown, 0, 12, 75.0);
-        setLiftingData(triPushdown, 1, 9, 75.0);
-        setLiftingData(triPushdown, 2, 8, 75.0);
+        // Create valid workouts for primary user
+        pushWorkout = createWorkoutForUser("Push", LocalDate.of(2026, 3, 1), testUser);
+        pullWorkout = createWorkoutForUser("Pull", LocalDate.of(2026, 3, 3), testUser);
+        legsWorkout = createWorkoutForUser("Legs", LocalDate.of(2026, 3, 5), testUser);
 
-        jog = Exercise.makeCardioExercise("Jog", 1);
-        setCardioData(jog, 0, 1, Duration.ofMinutes(60), 5.0);
+        // Create a workout for a different user to verify filtering works
+        otherUsersPushWorkout = createWorkoutForUser("Push", LocalDate.of(2026, 3, 2), otherUser);
 
-        pushWorkout.addExercise(benchPress);
-        pushWorkout.addExercise(triPushdown);
-        pushWorkout.addExercise(jog);
-
-        /// ==================== PULL WORKOUT ====================
-        deadlift = Exercise.makeLiftingExercise("Deadlift", 3);
-        setLiftingData(deadlift, 0, 5, 315.0);
-        setLiftingData(deadlift, 1, 5, 315.0);
-        setLiftingData(deadlift, 2, 3, 365.0);
-
-        latPulldown = Exercise.makeLiftingExercise("Lat Pulldown", 3);
-        setLiftingData(latPulldown, 0, 12, 140.0);
-        setLiftingData(latPulldown, 1, 10, 140.0);
-        setLiftingData(latPulldown, 2, 8, 150.0);
-
-        bike = Exercise.makeCardioExercise("Bike", 1);
-        setCardioData(bike, 0, 1, Duration.ofMinutes(25), 8.0);
-
-        pullWorkout.addExercise(deadlift);
-        pullWorkout.addExercise(latPulldown);
-        pullWorkout.addExercise(bike);
-
-        /// ==================== LEGS WORKOUT ====================
-        squat = Exercise.makeLiftingExercise("Squat", 3);
-        setLiftingData(squat, 0, 8, 275.0);
-        setLiftingData(squat, 1, 6, 295.0);
-        setLiftingData(squat, 2, 4, 315.0);
-
-        legCurl = Exercise.makeLiftingExercise("Leg Curl", 3);
-        setLiftingData(legCurl, 0, 15, 90.0);
-        setLiftingData(legCurl, 1, 12, 100.0);
-        setLiftingData(legCurl, 2, 10, 110.0);
-
-        stairMaster = Exercise.makeCardioExercise("StairMaster", 1);
-        setCardioData(stairMaster, 0, 1, Duration.ofMinutes(20), 2.0);
-
-        legsWorkout.addExercise(squat);
-        legsWorkout.addExercise(legCurl);
-        legsWorkout.addExercise(stairMaster);
-
-        repository.save(pushWorkout);
-        repository.save(pullWorkout);
-        repository.save(legsWorkout);
+        workoutRepository.saveAll(List.of(
+                pushWorkout,
+                pullWorkout,
+                legsWorkout,
+                otherUsersPushWorkout
+        ));
+        // save and flush does a saveAllAndFlush which saves all the workouts in one go
     }
 
-    private void setLiftingData(Exercise exercise, int setIndex, int reps, double weight)
+    /**
+     * Helper method to create and save a user with the given details.
+     */
+    private User createAndSaveUser(String username, String email, String passwordHash)
     {
-        ExerciseSet set = exercise.getSet(setIndex);
-        assertTrue(set instanceof LiftingExerciseSet, "Expected a LiftingExerciseSet");
-
-        LiftingExerciseSet liftingSet = (LiftingExerciseSet) set;
-        liftingSet.setReps(reps);
-        liftingSet.setWeight(weight);
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash(passwordHash);
+        return userRepository.save(user);
     }
 
-    private void setCardioData(Exercise exercise, int setIndex, int reps, Duration duration, double distance)
+    /**
+     * Helper method to create and save a workout for a user with the given details.
+     */
+    private Workout createWorkoutForUser(String dayName, LocalDate date, User user)
     {
-        ExerciseSet set = exercise.getSet(setIndex);
-        assertTrue(set instanceof CardioExerciseSet, "Expected a CardioExerciseSet");
-
-        CardioExerciseSet cardioSet = (CardioExerciseSet) set;
-        cardioSet.setReps(reps);
-        cardioSet.setDuration(duration);
-        cardioSet.setDistance(distance);
+        Workout workout = new Workout(dayName, date);
+        workout.setUser(user);
+        return workout;
     }
 
+    /**
+     * Test that saving a workout assigns an ID to it.
+     */
     @Test
-    void addWorkoutAndGetWorkoutHistoryTest()
+    void saveWorkoutAssignsIdTest()
     {
-        List<Workout> history = repository.findAll();
+        Workout workout = createWorkoutForUser(
+                "Upper",
+                LocalDate.of(2026, 3, 7),
+                testUser
+        );
 
-        assertEquals(3, history.size());
-        assertTrue(history.contains(pushWorkout));
-        assertTrue(history.contains(pullWorkout));
-        assertTrue(history.contains(legsWorkout));
+        Workout savedWorkout = workoutRepository.save(workout);
+
+        assertNotNull(savedWorkout.getId());
+        assertEquals("Upper", savedWorkout.getDayName());
+        assertEquals(LocalDate.of(2026, 3, 7), savedWorkout.getDate());
+        assertEquals(testUser.getId(), savedWorkout.getUser().getId());
     }
 
+    /**
+     * Test that findByUserId returns only workouts for the specified user.
+     */
     @Test
-    void workoutGetterTest()
+    void findByUserIdReturnsOnlyThatUsersWorkoutsTest()
     {
-        assertEquals("Push", pushWorkout.getDayName());
-        assertEquals(LocalDate.of(2026, 3, 1), pushWorkout.getDate());
-        assertEquals(3, pushWorkout.getExercises().size());
+        List<Workout> results = workoutRepository.findByUserId(testUser.getId());
 
-        assertEquals("Pull", pullWorkout.getDayName());
-        assertEquals(LocalDate.of(2026, 3, 3), pullWorkout.getDate());
-        assertEquals(3, pullWorkout.getExercises().size());
-
-        assertEquals("Legs", legsWorkout.getDayName());
-        assertEquals(LocalDate.of(2026, 3, 5), legsWorkout.getDate());
-        assertEquals(3, legsWorkout.getExercises().size());
+        assertEquals(3, results.size());
+        assertTrue(results.contains(pushWorkout));
+        assertTrue(results.contains(pullWorkout));
+        assertTrue(results.contains(legsWorkout));
+        assertFalse(results.contains(otherUsersPushWorkout));
     }
 
+    /**
+     * Test that findByUserId returns only workouts for the specified user.
+     */
     @Test
-    void pushWorkoutLiftingSetDataTest()
+    void findByUserIdReturnsEmptyForUnknownUserTest()
     {
-        assertEquals("Bench Press", benchPress.getName());
-        assertEquals("Tricep Pushdown", triPushdown.getName());
+        List<Workout> results = workoutRepository.findByUserId(999999L);
 
-        LiftingExerciseSet benchSet1 = (LiftingExerciseSet) benchPress.getSet(0);
-        LiftingExerciseSet benchSet2 = (LiftingExerciseSet) benchPress.getSet(1);
-        LiftingExerciseSet benchSet3 = (LiftingExerciseSet) benchPress.getSet(2);
-
-        assertEquals(8, benchSet1.getReps());
-        assertEquals(225.0, benchSet1.getWeight(), 0.001);
-
-        assertEquals(7, benchSet2.getReps());
-        assertEquals(225.0, benchSet2.getWeight(), 0.001);
-
-        assertEquals(4, benchSet3.getReps());
-        assertEquals(255.0, benchSet3.getWeight(), 0.001);
-
-        LiftingExerciseSet pushdownSet1 = (LiftingExerciseSet) triPushdown.getSet(0);
-        LiftingExerciseSet pushdownSet2 = (LiftingExerciseSet) triPushdown.getSet(1);
-        LiftingExerciseSet pushdownSet3 = (LiftingExerciseSet) triPushdown.getSet(2);
-
-        assertEquals(12, pushdownSet1.getReps());
-        assertEquals(75.0, pushdownSet1.getWeight(), 0.001);
-
-        assertEquals(9, pushdownSet2.getReps());
-        assertEquals(75.0, pushdownSet2.getWeight(), 0.001);
-
-        assertEquals(8, pushdownSet3.getReps());
-        assertEquals(75.0, pushdownSet3.getWeight(), 0.001);
+        assertTrue(results.isEmpty());
     }
 
+    /**
+     * Test that findByUserIdAndDateRange returns only workouts for the specified user within the given date range.
+     */
     @Test
-    void cardioSetDataTest()
+    void findByUserIdAndDateRangeReturnsOnlyMatchingDatesForThatUserTest()
     {
-        CardioExerciseSet jogSet = (CardioExerciseSet) jog.getSet(0);
-        assertEquals(1, jogSet.getReps());
-        assertEquals(Duration.ofMinutes(60), jogSet.getDuration());
-        assertEquals(5.0, jogSet.getDistance(), 0.001);
-
-        CardioExerciseSet bikeSet = (CardioExerciseSet) bike.getSet(0);
-        assertEquals(1, bikeSet.getReps());
-        assertEquals(Duration.ofMinutes(25), bikeSet.getDuration());
-        assertEquals(8.0, bikeSet.getDistance(), 0.001);
-
-        CardioExerciseSet stairSet = (CardioExerciseSet) stairMaster.getSet(0);
-        assertEquals(1, stairSet.getReps());
-        assertEquals(Duration.ofMinutes(20), stairSet.getDuration());
-        assertEquals(2.0, stairSet.getDistance(), 0.001);
-    }
-
-    @Test
-    void eachWorkoutContainsBothLiftingAndCardioTest()
-    {
-        for (Workout workout : repository.findAll())
-        {
-            boolean hasLifting = false;
-            boolean hasCardio = false;
-
-            for (Exercise exercise : workout.getExercises())
-            {
-                ExerciseSet firstSet = exercise.getSet(0);
-
-                if (firstSet instanceof LiftingExerciseSet)
-                {
-                    hasLifting = true;
-                }
-
-                if (firstSet instanceof CardioExerciseSet)
-                {
-                    hasCardio = true;
-                }
-            }
-
-            assertTrue(hasLifting, workout.getDayName() + " should contain a lifting exercise");
-            assertTrue(hasCardio, workout.getDayName() + " should contain a cardio exercise");
-        }
-    }
-
-    @Test
-    void findWorkoutsByDateRangeTest()
-    {
-        // Assumes tracker method signature is:
-        // List<Workout> findWorkoutsByDate(LocalDate startDate, LocalDate endDate)
-
-        List<Workout> results = repository.findByDateRange(
+        List<Workout> results = workoutRepository.findByUserIdAndDateRange(
+                testUser.getId(),
                 LocalDate.of(2026, 3, 2),
                 LocalDate.of(2026, 3, 5)
         );
@@ -245,76 +149,75 @@ public class WorkoutRepoTest
         assertTrue(results.contains(pullWorkout));
         assertTrue(results.contains(legsWorkout));
         assertFalse(results.contains(pushWorkout));
+        assertFalse(results.contains(otherUsersPushWorkout));
     }
 
+    /**
+     * Test that findByUserIdAndDateRange returns only workouts for the specified user within the given date range.
+     */
     @Test
-    void findWorkoutsByMatchingNameTest()
+    void findByUserIdAndDateRangeReturnsEmptyWhenNothingMatchesTest()
     {
-        // Assumes tracker method signature is:
-        // List<Workout> findWorkoutsByName(String name)
-
-        List<Workout> results = repository.findByDayName("Push");
-
-        assertEquals(1, results.size());
-        assertEquals("Push", results.get(0).getDayName());
-        assertEquals(LocalDate.of(2026, 3, 1), results.get(0).getDate());
-    }
-
-    @Test
-    void findWorkoutsByNameNoMatchTest()
-    {
-        List<Workout> results = repository.findByDayName("Chest");
+        List<Workout> results = workoutRepository.findByUserIdAndDateRange(
+                testUser.getId(),
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 4, 30)
+        );
 
         assertTrue(results.isEmpty());
     }
 
+    /**
+     * Test that findByUserIdAndDayName returns only workouts for the specified user on the specified day.
+     */
     @Test
-    void displayWorkoutContainsExpectedTextTest()
+    void findByUserIdAndDayNameReturnsOnlyMatchingWorkoutForThatUserTest()
     {
-        String display = pushWorkout.displayWorkout();
+        List<Workout> results = workoutRepository.findByUserIdAndDayName(
+                testUser.getId(),
+                "Push"
+        );
 
-        assertTrue(display.contains("Workout Date: 2026-03-01"));
-        assertTrue(display.contains("Exercise: Bench Press"));
-        assertTrue(display.contains("Exercise: Tricep Pushdown"));
-        assertTrue(display.contains("Exercise: Jog"));
+        assertEquals(1, results.size());
+        assertEquals("Push", results.get(0).getDayName());
+        assertEquals(testUser.getId(), results.get(0).getUser().getId());
+        assertEquals(pushWorkout.getDate(), results.get(0).getDate());
     }
 
+    /**
+     * Test that findByUserIdAndDayName returns only workouts for the specified user on the specified day.
+     */
     @Test
-    void printAllWorkoutsTest()
+    void findByUserIdAndDayNameDoesNotLeakOtherUsersWorkoutTest()
     {
-        for (Workout workout : repository.findAll())
-        {
-            System.out.println("=================================");
-            System.out.println("Workout Name: " + workout.getDayName());
-            System.out.println(workout.displayWorkout());
-        }
+        List<Workout> results = workoutRepository.findByUserIdAndDayName(
+                otherUser.getId(),
+                "Push"
+        );
+
+        assertEquals(1, results.size());
+        assertEquals(otherUser.getId(), results.get(0).getUser().getId());
+        assertEquals(LocalDate.of(2026, 3, 2), results.get(0).getDate());
     }
 
+    /**
+     * Test that findByUserIdAndDayName returns only workouts for the specified user on the specified day.
+     */
     @Test
-    void saveNullWorkoutThrowsTest()
+    void findByUserIdAndDayNameReturnsEmptyWhenNoMatchTest()
     {
-        assertThrows(IllegalArgumentException.class, () -> repository.save(null));
-    }
+        List<Workout> results = workoutRepository.findByUserIdAndDayName(
+                testUser.getId(),
+                "Chest"
+        );
 
-    @Test
-    void findByNameBlankReturnsEmptyTest()
-    {
-        assertTrue(repository.findByDayName("   ").isEmpty());
-    }
-
-    @Test
-    void findByDateRangeWithNullsReturnsEmptyTest()
-    {
-        assertTrue(repository.findByDateRange(null, LocalDate.now()).isEmpty());
-        assertTrue(repository.findByDateRange(LocalDate.now(), null).isEmpty());
-    }
-
-    @Test
-    void findAllReturnsCopyTest()
-    {
-        List<Workout> history = repository.findAll();
-        history.clear();
-
-        assertEquals(3, repository.findAll().size());
+        assertTrue(results.isEmpty());
     }
 }
+
+/*
+ Much simpler thatn the workout service test. Just needs to use @DataJpaTest and @Autowired to inject the repo beans,
+ and create test users and workouts.
+ Then we can test the repo by ensuring basic workout information and functionality is correctly
+ saved, displayed, etc.
+ */
