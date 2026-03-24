@@ -62,6 +62,7 @@ public class Workout
     // Have each workout hold a list containing all exercises of object type exercise from exercise class
     // array format for now, but lets us have some flexibility for dev if want to switch
 
+    @Setter
     @Column(name = "date", nullable = false)
     private LocalDate date;
     // typical way to standardize time via java.time package. Will use often

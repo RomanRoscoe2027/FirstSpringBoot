@@ -8,39 +8,64 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface WorkoutRepository extends JpaRepository<Workout, Integer>
+public interface WorkoutRepository extends JpaRepository<Workout, Long>
 {
     /**
      * Find workouts given a name for the day, push, pull, legs, etc.
      * Spring Data JPA automatically implements this based on method name.
      * Trims and doesn't care about caps
      *
-     * @param dayName
+     * @param dayName - name of workout day, push, pull, legs, etc.
      * @return matchingWorkouts - a list of all workouts with the same or similar names.
      */
-    @NativeQuery(""" 
-        SELECT * FROM workouts WHERE day_name = :dayName
+    @NativeQuery("""
+
+            SELECT * FROM workouts
+        WHERE user_id = :userId
+          AND day_name = :dayName
         """)
-    List<Workout> findByDayName(@Param("dayName") String dayName);
+    List<Workout> findByUserIdAndDayName(@Param("userId") Long userId,
+                                         @Param("dayName") String dayName);
 
     /**
      * Find workouts given an interval of dates.
      * Any workouts falling within the interval will be returned, can be used for one day as well.
      *
-     * @param startDate
-     * @param endDate
+     * @param startDate - start of date time interval
+     * @param endDate - end of date time interval
      * @return matchingWorkouts - a list of all workouts within the interval.
      */
     @NativeQuery("""
-    SELECT * FROM workouts
-    WHERE date >= :startDate
-      AND date <= :endDate
-    """)
-    List<Workout> findByDateRange(@Param("startDate") LocalDate startDate,
-                                  @Param("endDate") LocalDate endDate);
+        SELECT * FROM workouts
+        WHERE user_id = :userId
+          AND date >= :startDate
+          AND date <= :endDate
+        """)
+    List<Workout> findByUserIdAndDateRange(@Param("userId") Long userId,
+                                           @Param("startDate") LocalDate startDate,
+                                           @Param("endDate") LocalDate endDate);
+
+    @NativeQuery("""
+        SELECT * FROM workouts
+        WHERE user_id = :userId
+          AND day_name = :dayName
+          AND date = :date
+        """)
+    Optional<Workout> findByUserIdAndDayNameAndDate(@Param("userId") Long userId,
+                                                    @Param("dayName") String dayName,
+                                                    @Param("date") LocalDate date);
+
+    @NativeQuery("""
+        SELECT * FROM workouts
+        WHERE user_id = :userId
+        """)
+    List<Workout> findByUserId(@Param("userId") Long userId);
+
 }
+
 
 
 

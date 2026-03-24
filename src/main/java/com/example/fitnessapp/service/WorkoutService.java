@@ -1,12 +1,16 @@
 package com.example.fitnessapp.service;
 
+import com.example.fitnessapp.dto.request.CreateWorkoutRequest;
 import com.example.fitnessapp.model.User;
 import com.example.fitnessapp.model.Workout;
 import com.example.fitnessapp.repository.WorkoutRepository;
 import com.example.fitnessapp.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional; // needed for transactional methods, transactional = atomicity
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service; // needed for spring service components.
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,47 +21,60 @@ import java.util.Optional; // designed to protect agains null values, good on ht
  */
 @Service
 @RequiredArgsConstructor
+@Validated // so easy to validate params coming in now for search funcs
 public class WorkoutService
 {
     /// Initialize repository, make final so ref can't be changed
     private final WorkoutRepository workoutRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Creates a new workout and saves it to the database.
+     * Takes in a request body and creates a new workout object from it.
+     * @param userId - passed by http request as a path variable
+     * @param request - request body containing workout day name and date
+     * @return - saved workout object
+     */
     @Transactional
-    public Workout addWorkoutToUser(Long userId, String dayName)
+    public Workout createWorkout(Long userId, CreateWorkoutRequest request)
     {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new IllegalArgumentException("User not found.")); // no user to add workout too?
 
+        // basically all lombok here lol
         Workout workout = new Workout();
-        workout.setDayName(dayName);
+        workout.setDayName(request.getDayName().trim());
+        workout.setDate(request.getDate());
         workout.setUser(user);
 
         return workoutRepository.save(workout);
+        /*
+        saves workout to database with spring CRUD methods, determines between INSERT and UPDATE by checking
+        entities @Id field and if it's null, it's an INSERT, otherwise it's an UPDATE.
+        */
     }
-
 
     /**
      * Finds matching workouts by name via tracker
-     * @param name
-     * @return tracker.findWorkoutsMatchingName(name) - list of workouts with matching names
+     * @param name - name of workout to be found
+     * @return repo.findWorkoutsMatchingName(name) - list of workouts with matching names
      */
-    public List<Workout> findWorkoutsMatchingName(String name)
+    public List<Workout> findWorkoutsMatchingName(Long userId, String name)
     {
         String trimmedName = requireValidName(name);
-        return workoutRepository.findByDayName(trimmedName);
+        return workoutRepository.findByUserIdAndDayName(userId, trimmedName);
     }
 
     /**
      * Finds matching workouts by date
-     * @param start
-     * @param end
-     * @return tracker.findWorkoutsMatchingDate(start, end) - returns new list of all workouts within interval
+     * @param start - start of date time interval
+     * @param end - end of date time interval
+     * @return repo.findWorkoutsMatchingDate(start, end) - returns new list of all workouts within interval
      */
-    public List<Workout> findWorkoutsMatchingDate(LocalDate start, LocalDate end)
+    public List<Workout> findWorkoutsMatchingDate(Long userId, LocalDate start, LocalDate end)
     {
         requireValidDateRange(start, end);
-        return workoutRepository.findByDateRange(start, end);
+        return workoutRepository.findByUserIdAndDateRange(userId, start, end);
     }
 
     /**
@@ -67,10 +84,10 @@ public class WorkoutService
      * if containing null
      * @param name - name of workout to be removed
      * @param date - date of workout to be removed
-     * @return boolean - true for workout removed, false otherwise
+     * @return matchingWorkout - Optional of workout that was removed, if it exists.
      */
     @Transactional
-    public Optional<Workout> removeWorkout(Long userId, String name, LocalDate date)
+    public Optional<Workout> removeWorkout(@Positive Long userId, String name, LocalDate date)
     {
         String trimmedName = requireValidName(name);
 
@@ -80,7 +97,7 @@ public class WorkoutService
         }
 
         Optional<Workout> matchingWorkout =
-                workoutRepository.findByUserIdAndDayNameAndDate(userId, trimmedName, date); // NOT IMPLEMENTED WILL COME BACK TO. JUST HAVE TO ADD USER ID WITH QUERY
+                workoutRepository.findByUserIdAndDayNameAndDate(userId, trimmedName, date);
 
         matchingWorkout.ifPresent(workoutRepository::delete);
 
@@ -89,7 +106,7 @@ public class WorkoutService
 
     /**
      * Validity checking of name, ensure that the name is blank and trimmed.
-     * @param name
+     * @param name - name of workout
      * @return name.trim() - ensures name without whitespaces
      */
     private String requireValidName(String name)
@@ -103,8 +120,8 @@ public class WorkoutService
 
     /**
      * Validity checking of date range, if dates aren't valid throw exception
-     * @param start
-     * @param end
+     * @param start - start date of interval
+     * @param end - end date of interval
      */
     private void requireValidDateRange(LocalDate start, LocalDate end)
     {
@@ -117,4 +134,17 @@ public class WorkoutService
             throw new IllegalArgumentException("Start date must be on or before end date.");
         }
     }
+
+    public List<Workout> getWorkoutHistory(Long userId)
+    {
+        return workoutRepository.findByUserId(userId);
+    }
 }
+
+/*
+Can remove these validity checking helper functions and use validation with @NotNull, @NotBlank etc,
+HOWEVER:
+ business logic like ensuring dates are in correct order, still need these helper funcs.
+So gotta be careful on how much I rely on these
+nice annotations from spring...
+*/
