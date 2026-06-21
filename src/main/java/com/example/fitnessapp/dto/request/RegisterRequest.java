@@ -33,18 +33,3 @@ public class RegisterRequest
     @Size(max = 50, message = "Last name cannot exceed 50 characters.")
     private String lastName;
 }
-/*
-Understanding why these DTOs are needed definitely confuses me when I try to convince myself they are
-absolutely necessary.
-They are in a way, but mainly for project structure and clean validation. Seperation of these classes from the logic in
-the controller or the service is what is really important.
-The validation annotations make life so much easier in checking for good inputs.
-
-The other reason is not to expose entities, making it concrete exactly what the user is able to send over
-via an endpoint and not a User. Spring is designed to translate requests from these classes via
-ex:
-@Valid @RequestBody RegisterRequest request
-which deserializes through springs http conversion system. Very cool
-
-In other words we keep entities as persistence and db specific, and only expose the data needed for the endpoint.
-*/

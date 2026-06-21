@@ -1,6 +1,5 @@
-package com.example.fitnessapp.repository;
+package com.example.fitnessapp.user_workout;
 
-import com.example.fitnessapp.model.Workout;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface WorkoutRepository extends JpaRepository<Workout, Long>
+public interface UserWorkoutRepository extends JpaRepository<UserWorkout, Long>
 {
     /**
      * Find workouts given a name for the day, push, pull, legs, etc.
@@ -27,8 +26,8 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long>
         WHERE user_id = :userId
           AND day_name = :dayName
         """)
-    List<Workout> findByUserIdAndDayName(@Param("userId") Long userId,
-                                         @Param("dayName") String dayName);
+    List<UserWorkout> findByUserIdAndDayName(@Param("userId") Long userId,
+                                             @Param("dayName") String dayName);
 
     /**
      * Find workouts given an interval of dates.
@@ -44,9 +43,9 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long>
           AND date >= :startDate
           AND date <= :endDate
         """)
-    List<Workout> findByUserIdAndDateRange(@Param("userId") Long userId,
-                                           @Param("startDate") LocalDate startDate,
-                                           @Param("endDate") LocalDate endDate);
+    List<UserWorkout> findByUserIdAndDateRange(@Param("userId") Long userId,
+                                               @Param("startDate") LocalDate startDate,
+                                               @Param("endDate") LocalDate endDate);
 
     @NativeQuery("""
         SELECT * FROM workouts
@@ -54,15 +53,15 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long>
           AND day_name = :dayName
           AND date = :date
         """)
-    Optional<Workout> findByUserIdAndDayNameAndDate(@Param("userId") Long userId,
-                                                    @Param("dayName") String dayName,
-                                                    @Param("date") LocalDate date);
+    Optional<UserWorkout> findByUserIdAndDayNameAndDate(@Param("userId") Long userId,
+                                                        @Param("dayName") String dayName,
+                                                        @Param("date") LocalDate date);
 
     @NativeQuery("""
         SELECT * FROM workouts
         WHERE user_id = :userId
         """)
-    List<Workout> findByUserId(@Param("userId") Long userId);
+    List<UserWorkout> findByUserId(@Param("userId") Long userId);
 
 }
 

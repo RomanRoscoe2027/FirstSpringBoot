@@ -1,11 +1,11 @@
 package com.example.fitnessapp;
 
 import com.example.fitnessapp.dto.request.CreateWorkoutRequest;
-import com.example.fitnessapp.model.User;
-import com.example.fitnessapp.model.Workout;
-import com.example.fitnessapp.repository.UserRepository;
-import com.example.fitnessapp.repository.WorkoutRepository;
-import com.example.fitnessapp.service.WorkoutService;
+import com.example.fitnessapp.user.User;
+import com.example.fitnessapp.user_workout.UserWorkout;
+import com.example.fitnessapp.user.UserRepository;
+import com.example.fitnessapp.user_workout.UserWorkoutRepository;
+import com.example.fitnessapp.user_workout.UserWorkoutService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,14 +35,14 @@ public class WorkoutServiceTest
     @Mock /// Mocks the repository to avoid database access during tests
     private UserRepository userRepository; // remember, NEED user repo to create a workout, hence mock needs it as well
     @Mock
-    private WorkoutRepository workoutRepository; // mocking the repo is enough to avoid database access
+    private UserWorkoutRepository workoutRepository; // mocking the repo is enough to avoid database access
 
-    private WorkoutService workoutService;
+    private UserWorkoutService workoutService;
 
     @BeforeEach /// runs before each test, configuring a new service @BeforeALl, would share resources, this resets before each test
     void setUp()
     {
-        workoutService = new WorkoutService(workoutRepository, userRepository);
+        workoutService = new UserWorkoutService(workoutRepository, userRepository);
         // now service can be tested because it has both mock repos
     }
 
@@ -67,12 +65,12 @@ public class WorkoutServiceTest
         request.setDate(date); // set date
 
         // Prepare the expected saved entity
-        Workout savedWorkout = new Workout("Push", date);
+        UserWorkout savedWorkout = new UserWorkout("Push", date);
         savedWorkout.setUser(mockUser); // associate the workout with the mock user
-        when(workoutRepository.save(any(Workout.class))).thenReturn(savedWorkout); //
+        when(workoutRepository.save(any(UserWorkout.class))).thenReturn(savedWorkout); //
 
         // 2. Act
-        Workout result = workoutService.createWorkout(userId, request);
+        UserWorkout result = workoutService.createWorkout(userId, request);
         // HERE should call both userRepo.find and workoutRepo.save
 
         // 3. Assert
@@ -82,7 +80,7 @@ public class WorkoutServiceTest
 
         // Verify that the service interacted with the repositories as expected
         verify(userRepository).findById(userId);
-        verify(workoutRepository).save(any(Workout.class));
+        verify(workoutRepository).save(any(UserWorkout.class));
 
         /*
         UNDERSTANDING WHY THIS WORKS:
@@ -130,14 +128,14 @@ public class WorkoutServiceTest
         Long userId = 1L;
         String name = "Push";
         LocalDate date = LocalDate.of(2026, 3, 1);
-        Workout workout = new Workout(name, date);
+        UserWorkout workout = new UserWorkout(name, date);
 
         // Mock the specific lookup the service now performs
         when(workoutRepository.findByUserIdAndDayNameAndDate(userId, name, date))
                 .thenReturn(Optional.of(workout)); // return the workout or nothing if stuff is broken or unfound
 
         // 2. Act
-        Optional<Workout> removed = workoutService.removeWorkout(userId, name, date); // call the service to remove workout
+        Optional<UserWorkout> removed = workoutService.removeWorkout(userId, name, date); // call the service to remove workout
 
         // 3. Assert
         assertTrue(removed.isPresent()); // means workout succesfully removed and returned to us

@@ -1,7 +1,7 @@
 package com.example.fitnessapp.config;
 
-import com.example.fitnessapp.model.User;
-import com.example.fitnessapp.repository.UserRepository;
+import com.example.fitnessapp.user.User;
+import com.example.fitnessapp.user.UserRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,6 +62,6 @@ public class CustomUserDetailsService implements UserDetailsService // SUPER VIT
     We create a custom user details service to IMPLEMENT user details service.
     UserDetailsService is a spring security framework that allows us to override certain methods for our own
     unique authentication method. Hence we override loadUserByUsername() to provide our own custom authentication logic,
-    noting that our String login can be both a username or an email, with our checker interverining in the code below.
+    noting that our String login can be both a username or an email, with our checker intervening in the code below.
      */
 }

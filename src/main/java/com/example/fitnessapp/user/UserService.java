@@ -1,7 +1,5 @@
-package com.example.fitnessapp.service;
+package com.example.fitnessapp.user;
 
-import com.example.fitnessapp.model.User;
-import com.example.fitnessapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

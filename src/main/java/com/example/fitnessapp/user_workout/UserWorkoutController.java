@@ -1,8 +1,6 @@
-package com.example.fitnessapp.controller;
+package com.example.fitnessapp.user_workout;
 
 import com.example.fitnessapp.dto.request.CreateWorkoutRequest;
-import com.example.fitnessapp.model.Workout;
-import com.example.fitnessapp.service.WorkoutService;
 
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat; // for iso datetime from localtime
@@ -14,13 +12,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users/{userId}/workouts") // NEEDS USER ID FOR PATH VARIABLE
-public class WorkoutController
+public class UserWorkoutController
 {
     /// create controllers workout service dependency, final reference
-    private final WorkoutService workoutService;
+    private final UserWorkoutService workoutService;
 
     /// construct controllers final workout service reference
-    public WorkoutController(WorkoutService workoutService)
+    public UserWorkoutController(UserWorkoutService workoutService)
     {
         this.workoutService = workoutService; /// clear service dependency
     }
@@ -30,7 +28,7 @@ public class WorkoutController
      * @return all workouts as JSON.
      */
     @GetMapping
-    public List<Workout> getUserWorkouts(@PathVariable Long userId)
+    public List<UserWorkout> getUserWorkouts(@PathVariable Long userId)
     {
         // rip bean comment
         return workoutService.getWorkoutHistory(userId);
@@ -44,7 +42,7 @@ public class WorkoutController
      * @return - saved workout day and date
      */
     @PostMapping
-    public Workout createWorkout(@PathVariable Long userId, @Valid @RequestBody CreateWorkoutRequest request)
+    public UserWorkout createWorkout(@PathVariable Long userId, @Valid @RequestBody CreateWorkoutRequest request)
     {
         return workoutService.createWorkout(userId, request);
     }
@@ -55,7 +53,7 @@ public class WorkoutController
      * @return List<Workout>- All workouts with the same name
      */
     @GetMapping("/search/name")
-    public List<Workout> searchByMatchingName(@PathVariable Long userId, @RequestParam String name)
+    public List<UserWorkout> searchByMatchingName(@PathVariable Long userId, @RequestParam String name)
     {
         return workoutService.findWorkoutsMatchingName(userId, name);
     }
@@ -67,7 +65,7 @@ public class WorkoutController
      * @return List<Workout>- All workouts within the interval
      */
     @GetMapping("/search/date")
-    public List<Workout> searchByDate(
+    public List<UserWorkout> searchByDate(
             @PathVariable Long userId,
             @RequestParam
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
@@ -85,7 +83,7 @@ public class WorkoutController
      * @return - either http200 with the removed workout, or a failure http code
      */
     @DeleteMapping
-    public ResponseEntity<Workout> deleteWorkout(
+    public ResponseEntity<UserWorkout> deleteWorkout(
             @PathVariable Long userId,
             @RequestParam String name,
             @RequestParam

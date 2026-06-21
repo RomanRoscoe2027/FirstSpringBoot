@@ -1,8 +1,9 @@
 package com.example.fitnessapp;
 
-import com.example.fitnessapp.model.*;
-import com.example.fitnessapp.repository.UserRepository;
-import com.example.fitnessapp.repository.WorkoutRepository;
+import com.example.fitnessapp.user.UserRepository;
+import com.example.fitnessapp.user_workout.UserWorkout;
+import com.example.fitnessapp.user_workout.UserWorkoutRepository;
+import com.example.fitnessapp.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class WorkoutRepoTest
 {
     @Autowired // injects the workout repo bean into the test, does the same with user beans
-    private WorkoutRepository workoutRepository;
+    private UserWorkoutRepository workoutRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -27,10 +28,10 @@ class WorkoutRepoTest
     private User otherUser;
 
     // Create test workouts
-    private Workout pushWorkout;
-    private Workout pullWorkout;
-    private Workout legsWorkout;
-    private Workout otherUsersPushWorkout;
+    private UserWorkout pushWorkout;
+    private UserWorkout pullWorkout;
+    private UserWorkout legsWorkout;
+    private UserWorkout otherUsersPushWorkout;
 
     @BeforeEach // runs before each test, configuring a new repo
     void setUp()
@@ -80,9 +81,9 @@ class WorkoutRepoTest
     /**
      * Helper method to create and save a workout for a user with the given details.
      */
-    private Workout createWorkoutForUser(String dayName, LocalDate date, User user)
+    private UserWorkout createWorkoutForUser(String dayName, LocalDate date, User user)
     {
-        Workout workout = new Workout(dayName, date);
+        UserWorkout workout = new UserWorkout(dayName, date);
         workout.setUser(user);
         return workout;
     }
@@ -93,13 +94,13 @@ class WorkoutRepoTest
     @Test
     void saveWorkoutAssignsIdTest()
     {
-        Workout workout = createWorkoutForUser(
+        UserWorkout workout = createWorkoutForUser(
                 "Upper",
                 LocalDate.of(2026, 3, 7),
                 testUser
         );
 
-        Workout savedWorkout = workoutRepository.save(workout);
+        UserWorkout savedWorkout = workoutRepository.save(workout);
 
         assertNotNull(savedWorkout.getId());
         assertEquals("Upper", savedWorkout.getDayName());
@@ -113,7 +114,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdReturnsOnlyThatUsersWorkoutsTest()
     {
-        List<Workout> results = workoutRepository.findByUserId(testUser.getId());
+        List<UserWorkout> results = workoutRepository.findByUserId(testUser.getId());
 
         assertEquals(3, results.size());
         assertTrue(results.contains(pushWorkout));
@@ -128,7 +129,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdReturnsEmptyForUnknownUserTest()
     {
-        List<Workout> results = workoutRepository.findByUserId(999999L);
+        List<UserWorkout> results = workoutRepository.findByUserId(999999L);
 
         assertTrue(results.isEmpty());
     }
@@ -139,7 +140,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdAndDateRangeReturnsOnlyMatchingDatesForThatUserTest()
     {
-        List<Workout> results = workoutRepository.findByUserIdAndDateRange(
+        List<UserWorkout> results = workoutRepository.findByUserIdAndDateRange(
                 testUser.getId(),
                 LocalDate.of(2026, 3, 2),
                 LocalDate.of(2026, 3, 5)
@@ -158,7 +159,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdAndDateRangeReturnsEmptyWhenNothingMatchesTest()
     {
-        List<Workout> results = workoutRepository.findByUserIdAndDateRange(
+        List<UserWorkout> results = workoutRepository.findByUserIdAndDateRange(
                 testUser.getId(),
                 LocalDate.of(2026, 4, 1),
                 LocalDate.of(2026, 4, 30)
@@ -173,7 +174,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdAndDayNameReturnsOnlyMatchingWorkoutForThatUserTest()
     {
-        List<Workout> results = workoutRepository.findByUserIdAndDayName(
+        List<UserWorkout> results = workoutRepository.findByUserIdAndDayName(
                 testUser.getId(),
                 "Push"
         );
@@ -190,7 +191,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdAndDayNameDoesNotLeakOtherUsersWorkoutTest()
     {
-        List<Workout> results = workoutRepository.findByUserIdAndDayName(
+        List<UserWorkout> results = workoutRepository.findByUserIdAndDayName(
                 otherUser.getId(),
                 "Push"
         );
@@ -206,7 +207,7 @@ class WorkoutRepoTest
     @Test
     void findByUserIdAndDayNameReturnsEmptyWhenNoMatchTest()
     {
-        List<Workout> results = workoutRepository.findByUserIdAndDayName(
+        List<UserWorkout> results = workoutRepository.findByUserIdAndDayName(
                 testUser.getId(),
                 "Chest"
         );
@@ -216,7 +217,7 @@ class WorkoutRepoTest
 }
 
 /*
- Much simpler thatn the workout service test. Just needs to use @DataJpaTest and @Autowired to inject the repo beans,
+ Much simpler than the workout service test. Just needs to use @DataJpaTest and @Autowired to inject the repo beans,
  and create test users and workouts.
  Then we can test the repo by ensuring basic workout information and functionality is correctly
  saved, displayed, etc.

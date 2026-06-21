@@ -1,10 +1,8 @@
-package com.example.fitnessapp.service;
+package com.example.fitnessapp.user_workout;
 
 import com.example.fitnessapp.dto.request.CreateWorkoutRequest;
-import com.example.fitnessapp.model.User;
-import com.example.fitnessapp.model.Workout;
-import com.example.fitnessapp.repository.WorkoutRepository;
-import com.example.fitnessapp.repository.UserRepository;
+import com.example.fitnessapp.user.User;
+import com.example.fitnessapp.user.UserRepository;
 import jakarta.transaction.Transactional; // needed for transactional methods, transactional = atomicity
 
 import lombok.RequiredArgsConstructor;
@@ -22,10 +20,10 @@ import java.util.Optional; // designed to protect agains null values, good on ht
 @Service
 @RequiredArgsConstructor
 @Validated // so easy to validate params coming in now for search funcs
-public class WorkoutService
+public class UserWorkoutService
 {
     /// Initialize repository, make final so ref can't be changed
-    private final WorkoutRepository workoutRepository;
+    private final UserWorkoutRepository workoutRepository;
     private final UserRepository userRepository;
 
     /**
@@ -36,13 +34,13 @@ public class WorkoutService
      * @return - saved workout object
      */
     @Transactional
-    public Workout createWorkout(Long userId, CreateWorkoutRequest request)
+    public UserWorkout createWorkout(Long userId, CreateWorkoutRequest request)
     {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found.")); // no user to add workout too?
 
         // basically all lombok here lol
-        Workout workout = new Workout();
+        UserWorkout workout = new UserWorkout();
         workout.setDayName(request.getDayName().trim());
         workout.setDate(request.getDate());
         workout.setUser(user);
@@ -59,7 +57,7 @@ public class WorkoutService
      * @param name - name of workout to be found
      * @return repo.findWorkoutsMatchingName(name) - list of workouts with matching names
      */
-    public List<Workout> findWorkoutsMatchingName(Long userId, String name)
+    public List<UserWorkout> findWorkoutsMatchingName(Long userId, String name)
     {
         String trimmedName = requireValidName(name);
         return workoutRepository.findByUserIdAndDayName(userId, trimmedName);
@@ -71,7 +69,7 @@ public class WorkoutService
      * @param end - end of date time interval
      * @return repo.findWorkoutsMatchingDate(start, end) - returns new list of all workouts within interval
      */
-    public List<Workout> findWorkoutsMatchingDate(Long userId, LocalDate start, LocalDate end)
+    public List<UserWorkout> findWorkoutsMatchingDate(Long userId, LocalDate start, LocalDate end)
     {
         requireValidDateRange(start, end);
         return workoutRepository.findByUserIdAndDateRange(userId, start, end);
@@ -87,7 +85,7 @@ public class WorkoutService
      * @return matchingWorkout - Optional of workout that was removed, if it exists.
      */
     @Transactional
-    public Optional<Workout> removeWorkout(@Positive Long userId, String name, LocalDate date)
+    public Optional<UserWorkout> removeWorkout(@Positive Long userId, String name, LocalDate date)
     {
         String trimmedName = requireValidName(name);
 
@@ -96,7 +94,7 @@ public class WorkoutService
             throw new IllegalArgumentException("Workout date is required.");
         }
 
-        Optional<Workout> matchingWorkout =
+        Optional<UserWorkout> matchingWorkout =
                 workoutRepository.findByUserIdAndDayNameAndDate(userId, trimmedName, date);
 
         matchingWorkout.ifPresent(workoutRepository::delete);
@@ -135,7 +133,7 @@ public class WorkoutService
         }
     }
 
-    public List<Workout> getWorkoutHistory(Long userId)
+    public List<UserWorkout> getWorkoutHistory(Long userId)
     {
         return workoutRepository.findByUserId(userId);
     }
