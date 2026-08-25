@@ -2,14 +2,14 @@ package com.example.fitnessapp.user_workout;
 
 import com.example.fitnessapp.workout_exercise.WorkoutExercise;
 import com.example.fitnessapp.user.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 import lombok.Setter;
-
-import java.util.ArrayList; // the concrete class implementation
-import java.util.List; // just an interface providing functionality via, add, size, remove, iterators, etc. Abstraction
-import java.time.LocalDate; // allows for grabbing the current date as of right now
+import java.util.ArrayList;
+import java.util.List;
+import java.time.LocalDate;
 
 /**
  * Class Workout holds information regarding a specific workout.
@@ -17,7 +17,7 @@ import java.time.LocalDate; // allows for grabbing the current date as of right 
  * Each workout holds exercises which are themselves tied to a workout. (Exercise class)
  */
 @Entity
-@Getter
+@Data
 @Table(name = "workouts")
 public class UserWorkout
 {
@@ -26,7 +26,6 @@ public class UserWorkout
     @Column(name = "id")
     private Long id;
 
-    @Setter
     @Column(name = "dayName", nullable = false)
     private String dayName;
 
@@ -38,27 +37,12 @@ public class UserWorkout
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Setter
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
-    /// Default constructor for JPA
-    public UserWorkout(String dayName, LocalDate date) {
-        this.dayName = dayName;
-        this.date = date;
-    }
-
-    /**
-     * Adds an exercise to the workout.
-     * @param exercise
-     */
-    public void addExercise(WorkoutExercise exercise)
-    {
-        exercisesInWorkout.add(exercise);
-        exercise.setWorkout(this);
-    }
-
+    public UserWorkout() {}
 }
 
 
