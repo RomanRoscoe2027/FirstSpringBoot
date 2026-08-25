@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### env file for db connections and whatnot ###
+src/main/resources/.env
