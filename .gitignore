@@ -34,4 +34,4 @@ build/
 
 
 ### env file for db connections and whatnot ###
-src/main/resources/.env
+.env
